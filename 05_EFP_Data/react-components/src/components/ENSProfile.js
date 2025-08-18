@@ -59,22 +59,14 @@ function ENSProfile({ address, ensName, provider }) {
             <h4>{ensName}</h4>
           </div>
           
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(ensData).map(([key, value]) => (
-                <tr key={key}>
-                  <td>{key}</td>
-                  <td>{value || 'Not set'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="ens-data">
+            {Object.entries(ensData).map(([key, value]) => (
+              <div key={key} className="ens-item">
+                <span className="ens-key">{key}:</span>
+                <span className="ens-value">{value || 'Not set'}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
