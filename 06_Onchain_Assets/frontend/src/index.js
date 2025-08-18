@@ -14,10 +14,15 @@ const ensLoaderElm = document.getElementById('ensLoader');
 const ensContainerElm = document.getElementById('ensContainer');
 const ensTableElm = document.getElementById('ensTable');
 
-const nftElm = document.getElementById('nft');
-const nftLoaderElm = document.getElementById('nftLoader');
-const nftContainerElm = document.getElementById('nftContainer');
-const nftTableElm = document.getElementById('nftTable');
+const assetsElm = document.getElementById('onchainAssets');
+
+const tokensLoaderElm = document.getElementById('tokensLoader');
+const tokensContainerElm = document.getElementById('tokensContainer');
+const tokensTableElm = document.getElementById('tokensTable');
+
+const nftsLoaderElm = document.getElementById('nftsLoader');
+const nftsContainerElm = document.getElementById('nftsContainer');
+const nftsTableElm = document.getElementById('nftsTable');
 
 let address;
 let chain;
@@ -76,9 +81,28 @@ async function displayENSProfile() {
     welcomeElm.classList = '';
 }
 
+async function getTokenBalances() {
+    try {
+        let res = await fetch(`${BACKEND_ADDR}/tokens/${address}`, {
+            credentials: 'include',
+        });
+        if (!res.ok) {
+            throw new Error(res.statusText)
+        }
+
+        let body = await res.json();
+        return body.tokens || [];
+    } catch (err) {
+        console.error(`Failed to resolve token balances: ${err.message}`);
+        return [];
+    }
+}
+
 async function getNFTs() {
     try {
-        let res = await fetch(`https://testnets-api.opensea.io/api/v2/chain/${chain}/account/${address}/nfts`);
+        let res = await fetch(`${BACKEND_ADDR}/nfts/${address}?chain=${chain}`, {
+            credentials: 'include',
+        });
         if (!res.ok) {
             throw new Error(res.statusText)
         }
@@ -95,29 +119,47 @@ async function getNFTs() {
             return {name, address, collection};
         });
     } catch (err) {
-        console.error(`Failed to resolve nfts: ${err.message}`);
+        console.error(`Failed to resolve NFTs: ${err.message}`);
         return [];
     }
 }
 
-async function displayNFTs() {
-    nftLoaderElm.innerHTML = 'Loading NFT Ownership...';
-    nftElm.classList = '';
+async function displayOnchainAssets() {
+    assetsElm.classList = '';
 
-    let nfts = await getNFTs();
-    if (nfts.length === 0) {
-        nftLoaderElm.innerHTML = 'No NFTs found';
-        return;
+    // Display Tokens
+    tokensLoaderElm.innerHTML = 'Loading token balances...';
+    let tokens = await getTokenBalances();
+    
+    if (tokens.length === 0) {
+        tokensLoaderElm.innerHTML = 'No tokens found';
+    } else {
+        let tokenTableHtml = "<tr><th>Token</th><th>Symbol</th><th>Balance</th><th>Contract</th></tr>";
+        tokens.forEach((token) => {
+            tokenTableHtml += `<tr><td>${token.name}</td><td>${token.symbol}</td><td>${token.balance}</td><td>${token.contractAddress}</td></tr>`
+        });
+        
+        tokensTableElm.innerHTML = tokenTableHtml;
+        tokensContainerElm.classList = '';
+        tokensLoaderElm.innerHTML = '';
     }
 
-    let tableHtml = "<tr><th>Name</th><th>Address</th><th>Token ID</th></tr>";
-    nfts.forEach((nft) => {
-        tableHtml += `<tr><td>${nft.name}</td><td>${nft.address}</td><td>${nft.collection}</td></tr>`
-    });
-
-    nftTableElm.innerHTML = tableHtml;
-    nftContainerElm.classList = '';
-    nftLoaderElm.innerHTML = '';
+    // Display NFTs
+    nftsLoaderElm.innerHTML = 'Loading NFT holdings...';
+    let nfts = await getNFTs();
+    
+    if (nfts.length === 0) {
+        nftsLoaderElm.innerHTML = 'No NFTs found';
+    } else {
+        let nftTableHtml = "<tr><th>Name</th><th>Contract Address</th><th>Collection</th></tr>";
+        nfts.forEach((nft) => {
+            nftTableHtml += `<tr><td>${nft.name}</td><td>${nft.address}</td><td>${nft.collection}</td></tr>`
+        });
+        
+        nftsTableElm.innerHTML = nftTableHtml;
+        nftsContainerElm.classList = '';
+        nftsLoaderElm.innerHTML = '';
+    }
 }
 
 async function signInWithEthereum() {
@@ -149,7 +191,7 @@ async function signInWithEthereum() {
     console.log(await res.text());
 
     displayENSProfile();
-    displayNFTs();
+    displayOnchainAssets();
 }
 
 async function getInformation() {
@@ -166,7 +208,7 @@ async function getInformation() {
     console.log(result);
     address = result.split(" ")[result.split(" ").length - 1];
     displayENSProfile();
-    displayNFTs();
+    displayOnchainAssets();
 }
 
 const connectWalletBtn = document.getElementById('connectWalletBtn');

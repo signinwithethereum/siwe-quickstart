@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>EFP Data Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>EFP Social Graph Viewer</h1>
+    
+    <div class="search-section">
+      <h3>Enter ENS name or Ethereum address</h3>
+      <div class="input-group">
+        <input type="text" id="addressInput" placeholder="Enter ENS name (vitalik.eth) or address (0x123...)" class="address-input">
+        <button id="searchBtn" class="btn btn-primary">Search Profile</button>
+      </div>
+      <div class="examples">
+        <p>Try these examples:</p>
+        <button class="example-btn" data-address="vitalik.eth">vitalik.eth</button>
+        <button class="example-btn" data-address="hayden.eth">hayden.eth</button>
+        <button class="example-btn" data-address="sassal.eth">sassal.eth</button>
+      </div>
+    </div>
+
+    <div class="hidden" id="welcome" class="welcome-section">
+    </div>
+
+    <div class="hidden" id="profile" class="profile-section">
+      <h3>Account Information:</h3>
+      <div id="ensLoader" class="loader">Loading...</div>
+      <div id="ensContainer" class="hidden">
+        <table id="ensTable" class="data-table">
+        </table>
+      </div>
+    </div>
+
+    <div class="hidden" id="noProfile" class="no-data">
+      No ENS Profile Found.
+    </div>
+
+    <!-- EFP Social Graph Section -->
+    <div class="hidden" id="efpProfile" class="efp-section">
+      <h3>EFP Social Graph:</h3>
+      <div id="efpLoader" class="loader">Loading EFP data...</div>
+      <div id="efpContainer" class="hidden">
+        <div id="efpStats"></div>
+        <div id="efpConnections"></div>
+      </div>
+    </div>
+    
+    <div class="hidden" id="noEFPProfile" class="no-data">
+      No EFP Profile detected.
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
