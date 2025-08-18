@@ -55,14 +55,14 @@ function ENSProfile({ address, ensName, provider }) {
       ) : (
         <div className="ens-content">
           <div className="ens-header">
-            {avatar && <img src={avatar} alt="ENS Avatar" className="avatar" />}
+            {avatar && <img src={avatar} alt="ENS Avatar" className="ens-avatar" />}
             <h4>{ensName}</h4>
           </div>
           
           <table className="data-table">
             <thead>
               <tr>
-                <th>ENS Text Key</th>
+                <th>Field</th>
                 <th>Value</th>
               </tr>
             </thead>

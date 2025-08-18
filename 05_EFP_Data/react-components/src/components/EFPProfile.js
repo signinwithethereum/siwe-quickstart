@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 function EFPProfile({ address }) {
   const [efpData, setEfpData] = useState(null);
   const [following, setFollowing] = useState([]);
+  const [followers, setFollowers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('stats');
 
   useEffect(() => {
     if (address) {
@@ -12,45 +13,81 @@ function EFPProfile({ address }) {
     }
   }, [address]);
 
+  const getEFPStats = async (address) => {
+    try {
+      const response = await fetch(`https://api.ethfollow.xyz/api/v1/users/${address}/stats`);
+      const stats = await response.json();
+      return {
+        followers: stats.followers_count,
+        following: stats.following_count,
+      };
+    } catch (error) {
+      console.error('Error fetching EFP stats:', error);
+      return null;
+    }
+  };
+
+  const getUserFollowing = async (address, limit = 10) => {
+    try {
+      const response = await fetch(
+        `https://api.ethfollow.xyz/api/v1/users/${address}/following?limit=${limit}`
+      );
+      const data = await response.json();
+      return data.following.map(follow => ({
+        address: follow.address,
+        ens: follow.ens,
+        avatar: follow.avatar,
+        tags: follow.tags || []
+      }));
+    } catch (error) {
+      console.error('Error fetching following list:', error);
+      return [];
+    }
+  };
+
+  const getUserFollowers = async (address, limit = 10) => {
+    try {
+      const response = await fetch(
+        `https://api.ethfollow.xyz/api/v1/users/${address}/followers?limit=${limit}`
+      );
+      const data = await response.json();
+      return data.followers.map(follower => ({
+        address: follower.address,
+        ens: follower.ens,
+        avatar: follower.avatar
+      }));
+    } catch (error) {
+      console.error('Error fetching followers list:', error);
+      return [];
+    }
+  };
+
   const loadEFPData = async () => {
     setLoading(true);
-    setError(null);
-    
     try {
-      // Get EFP stats
-      const statsResponse = await fetch(`https://api.ethfollow.xyz/api/v1/users/${address}/stats`);
-      if (!statsResponse.ok) {
-        throw new Error('Failed to fetch EFP stats');
-      }
-      const stats = await statsResponse.json();
-      
-      const efpStats = {
-        followers: stats.followers_count || 0,
-        following: stats.following_count || 0,
-      };
-      
-      setEfpData(efpStats);
-      
-      // Get following list if user follows someone
-      if (efpStats.following > 0) {
-        const followingResponse = await fetch(
-          `https://api.ethfollow.xyz/api/v1/users/${address}/following?limit=5`
-        );
-        if (followingResponse.ok) {
-          const followingData = await followingResponse.json();
-          setFollowing(followingData.following || []);
+      const stats = await getEFPStats(address);
+      if (stats && (stats.followers > 0 || stats.following > 0)) {
+        setEfpData(stats);
+        
+        if (stats.following > 0) {
+          const followingList = await getUserFollowing(address, 5);
+          setFollowing(followingList);
+        }
+        
+        if (stats.followers > 0) {
+          const followersList = await getUserFollowers(address, 5);
+          setFollowers(followersList);
         }
       }
     } catch (error) {
       console.error('Error loading EFP data:', error);
-      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatAddress = (addr) => {
-    return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+  const formatAddress = (address) => {
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
 
   if (loading) {
@@ -62,20 +99,13 @@ function EFPProfile({ address }) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="efp-section">
-        <h3>EFP Social Graph</h3>
-        <div className="error">Error loading EFP data: {error}</div>
-      </div>
-    );
-  }
-
   if (!efpData || (efpData.followers === 0 && efpData.following === 0)) {
     return (
       <div className="efp-section">
         <h3>EFP Social Graph</h3>
-        <div className="no-data">No EFP Profile detected.</div>
+        <div className="no-data">
+          No EFP Profile detected for this address.
+        </div>
       </div>
     );
   }
@@ -95,32 +125,71 @@ function EFPProfile({ address }) {
         </div>
       </div>
 
-      {following.length > 0 && (
-        <div className="connections-section">
-          <h4>Recent Follows:</h4>
+      <div className="efp-tabs">
+        <button 
+          className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
+          onClick={() => setActiveTab('stats')}
+        >
+          Stats
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'following' ? 'active' : ''}`}
+          onClick={() => setActiveTab('following')}
+          disabled={following.length === 0}
+        >
+          Following ({following.length})
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'followers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('followers')}
+          disabled={followers.length === 0}
+        >
+          Followers ({followers.length})
+        </button>
+      </div>
+
+      <div className="efp-content">
+        {activeTab === 'stats' && (
+          <div className="stats-content">
+            <p>This address has an active EFP social graph with {efpData.followers} followers and {efpData.following} following.</p>
+          </div>
+        )}
+        
+        {activeTab === 'following' && (
           <div className="connections-list">
+            <h4>Recent Follows:</h4>
             {following.map((follow, index) => (
               <div key={index} className="connection-item">
                 {follow.avatar && (
-                  <img 
-                    src={follow.avatar} 
-                    alt="Avatar" 
-                    className="avatar-small" 
-                  />
+                  <img src={follow.avatar} alt="Avatar" className="avatar-small" />
                 )}
                 <span className="connection-name">
                   {follow.ens || formatAddress(follow.address)}
                 </span>
-                {follow.tags && follow.tags.length > 0 && (
-                  <span className="tags">
-                    {follow.tags.join(', ')}
-                  </span>
+                {follow.tags.length > 0 && (
+                  <span className="tags">{follow.tags.join(', ')}</span>
                 )}
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+        
+        {activeTab === 'followers' && (
+          <div className="connections-list">
+            <h4>Recent Followers:</h4>
+            {followers.map((follower, index) => (
+              <div key={index} className="connection-item">
+                {follower.avatar && (
+                  <img src={follower.avatar} alt="Avatar" className="avatar-small" />
+                )}
+                <span className="connection-name">
+                  {follower.ens || formatAddress(follower.address)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

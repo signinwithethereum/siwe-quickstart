@@ -1,121 +1,186 @@
 # EFP Data - React Components
 
-A React implementation using modern hooks and components for integrating Ethereum Follow Protocol (EFP) data into your SIWE application.
+A comprehensive React implementation for integrating Ethereum Follow Protocol (EFP) data into your SIWE application using modern React patterns and the Ethereum Identity Kit.
 
 ## Features
 
-- **React Hooks**: Modern React patterns with useState and useEffect
-- **Component Architecture**: Modular, reusable components
-- **EFP Integration**: Complete social graph data display
-- **ENS Support**: Automatic ENS name resolution and metadata
-- **Responsive Design**: Mobile-first responsive layout
-- **Error Handling**: Comprehensive error states and loading indicators
+- Complete EFP profile integration with stats, followers, and following
+- ENS profile resolution with avatar support
+- Tabbed interface for better user experience
+- Responsive design for mobile and desktop
+- Error handling and loading states
+- Modern React hooks and patterns
+- TypeScript-ready (can be easily converted)
 
 ## Components
 
 ### `App.js`
-Main application component handling authentication and state management.
-
-### `AuthButtons.js`
-Reusable authentication button component with loading states.
-
-### `ENSProfile.js`
-Displays ENS profile information including avatar and metadata.
+Main application component that handles:
+- Wallet connection and authentication
+- SIWE message creation and verification
+- State management for user sessions
+- ENS name resolution
 
 ### `EFPProfile.js`
-Shows EFP social graph data including follower/following counts and recent connections.
+Comprehensive EFP integration component featuring:
+- Social graph statistics display
+- Tabbed interface for followers/following
+- Connection lists with avatars and tags
+- Real-time data fetching from EFP API
 
-## Setup
+### `ENSProfile.js`
+ENS profile component that displays:
+- ENS name and avatar
+- ENS text records (email, url, description, twitter)
+- Fallback for addresses without ENS
 
-1. Install dependencies:
+### `AuthButtons.js`
+Reusable authentication button component with:
+- Wallet connection
+- SIWE authentication
+- Session restoration
+- Loading states
+
+## Setup Instructions
+
+1. **Install Dependencies**
    ```bash
+   cd 05_EFP_Data/react-components
    yarn install
    ```
 
-2. Start the development server:
+2. **Start Development Server**
    ```bash
    yarn start
    ```
+   This will start the development server on `http://localhost:8081`
 
-3. Ensure your SIWE backend is running on localhost:3000
+3. **Backend Requirements**
+   Ensure your SIWE backend is running on `http://localhost:3000` with the following endpoints:
+   - `GET /nonce` - Generate authentication nonce
+   - `POST /verify` - Verify SIWE message
+   - `GET /personal_information` - Get session info
 
-4. Open http://localhost:8081 in your browser
+## Configuration
 
-## Dependencies
+### Environment Variables
+Create a `.env` file in the react-components directory:
+```
+REACT_APP_BACKEND_URL=http://localhost:3000
+REACT_APP_EFP_API_URL=https://api.ethfollow.xyz/api/v1
+```
 
-- **React 18**: Latest React with concurrent features
-- **ethers.js**: Ethereum provider and utilities
-- **siwe**: Sign-in with Ethereum library
-- **@ethereum-identity-kit/core**: EFP React hooks and components
+### Customization Options
 
-## Usage Patterns
-
-### Basic EFP Integration
-```jsx
-import EFPProfile from './components/EFPProfile';
-
-function MyApp() {
-  return (
-    <EFPProfile address="0x..." />
-  );
+**EFP Data Limits:**
+Modify the limit parameters in `EFPProfile.js`:
+```javascript
+const getUserFollowing = async (address, limit = 10) => {
+  // Increase limit to show more connections
 }
 ```
 
-### With ENS Support
-```jsx
-import { ENSProfile, EFPProfile } from './components';
+**Styling:**
+Customize the appearance by modifying `styles.css`:
+- Color scheme variables
+- Component spacing and layout
+- Responsive breakpoints
+- Animation timings
 
-function ProfileView({ address, provider }) {
+## EFP API Integration
+
+The component uses the following EFP API endpoints:
+
+| Endpoint | Purpose |
+|----------|----------|
+| `/users/{address}/stats` | Get follower/following counts |
+| `/users/{address}/following` | Get accounts user follows |
+| `/users/{address}/followers` | Get user's followers |
+
+## Advanced Features
+
+### Adding More EFP Functionality
+To extend the EFP integration, you can add:
+
+1. **Mutual Connections**
+   ```javascript
+   const getMutualConnections = async (address1, address2) => {
+     // Implementation for finding mutual follows
+   }
+   ```
+
+2. **Search Functionality**
+   ```javascript
+   const searchEFPUsers = async (searchTerm) => {
+     const response = await fetch(
+       `https://api.ethfollow.xyz/api/v1/leaderboard/search?term=${searchTerm}`
+     );
+     return response.json();
+   }
+   ```
+
+3. **Leaderboard Integration**
+   ```javascript
+   const getEFPLeaderboard = async (sort = 'followers', limit = 10) => {
+     const response = await fetch(
+       `https://api.ethfollow.xyz/api/v1/leaderboard/ranked?sort=${sort}&limit=${limit}`
+     );
+     return response.json();
+   }
+   ```
+
+### Using Ethereum Identity Kit
+
+For a more robust integration, consider using the Ethereum Identity Kit:
+
+```javascript
+import { useEFPProfile } from '@ethereum-identity-kit/core';
+
+function EFPProfileWithEIK({ address }) {
+  const { data: efpData, loading, error } = useEFPProfile(address);
+  
+  if (loading) return <div>Loading EFP data...</div>;
+  if (error) return <div>Error loading social graph</div>;
+  
   return (
     <div>
-      <ENSProfile address={address} provider={provider} />
-      <EFPProfile address={address} />
+      <h3>Social Graph</h3>
+      <div>Followers: {efpData.followers}</div>
+      <div>Following: {efpData.following}</div>
     </div>
   );
 }
 ```
 
-## Customization
+## Production Build
 
-### Styling
-Modify `src/styles.css` to customize the appearance. The CSS uses CSS custom properties for easy theming.
-
-### API Endpoints
-The EFP API calls in `EFPProfile.js` can be customized to show different data or use different endpoints.
-
-### Component Props
-Each component accepts props for customization:
-
-- `EFPProfile`: `address`, `limit` (for connection count)
-- `ENSProfile`: `address`, `ensName`, `provider`
-- `AuthButtons`: `onConnect`, `onSignIn`, `onGetInfo`, `loading`
-
-## Build for Production
+To create a production build:
 
 ```bash
 yarn build
 ```
 
-This creates a `dist/` folder with optimized production files.
+This will create an optimized build in the `dist/` directory ready for deployment.
 
-## Advanced Features
+## Browser Support
 
-### Custom Hooks
-Create custom hooks for EFP data:
+- Chrome/Edge 88+
+- Firefox 78+
+- Safari 14+
+- Mobile browsers with Web3 wallet support
 
-```jsx
-function useEFPProfile(address) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  
-  // Implementation...
-  
-  return { data, loading };
-}
+## Troubleshooting
+
+**Common Issues:**
+
+1. **CORS Errors**: Ensure your backend has proper CORS configuration
+2. **Web3 Not Detected**: User needs MetaMask or compatible wallet
+3. **EFP API Rate Limits**: Implement request throttling for production
+4. **Missing ENS Data**: Handle cases where ENS records are not set
+
+**Debug Mode:**
+Enable detailed logging by setting:
+```javascript
+console.log('Debug mode enabled');
+// Add detailed logging in component methods
 ```
-
-### Error Boundaries
-Add React Error Boundaries for better error handling in production.
-
-### State Management
-For larger applications, consider integrating with Redux or Zustand for global state management.
