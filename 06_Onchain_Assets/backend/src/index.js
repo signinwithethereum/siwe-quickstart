@@ -1,7 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 import Session from 'express-session'
-import { generateNonce, SiweMessage } from 'siwe'
+import { generateNonce, SiweMessage } from 'sign-in-with-ethereum'
 import { ethers } from 'ethers'
 
 const app = express()
