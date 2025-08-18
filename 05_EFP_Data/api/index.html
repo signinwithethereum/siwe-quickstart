@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>SIWE Quickstart - EFP Data</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>SIWE + EFP Social Graph</h1>
+    
+    <div class="auth-section">
+      <button id="connectWalletBtn" class="btn btn-primary">Connect Wallet</button>
+      <button id="siweBtn" class="btn btn-primary">Sign-in with Ethereum</button>
+      <button id="infoBtn" class="btn btn-secondary">Get Session Information</button>
+    </div>
+
+    <div class="hidden" id="welcome" class="welcome-section">
+    </div>
+
+    <div class="hidden" id="profile" class="profile-section">
+      <h3>ENS Metadata:</h3>
+      <div id="ensLoader" class="loader">Loading...</div>
+      <div id="ensContainer" class="hidden">
+        <table id="ensTable" class="data-table">
+        </table>
+      </div>
+    </div>
+
+    <div class="hidden" id="noProfile" class="no-data">
+      No ENS Profile Found.
+    </div>
+
+    <!-- EFP Social Graph Section -->
+    <div class="hidden" id="efpProfile" class="efp-section">
+      <h3>EFP Social Graph:</h3>
+      <div id="efpLoader" class="loader">Loading EFP data...</div>
+      <div id="efpContainer" class="hidden">
+        <div id="efpStats"></div>
+        <div id="efpConnections"></div>
+      </div>
+    </div>
+    
+    <div class="hidden" id="noEFPProfile" class="no-data">
+      No EFP Profile detected.
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
