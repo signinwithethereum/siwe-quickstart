@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIWE + EFP Social Graph</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SIWE + EFP Social Graph Demo</h1>
+            <p>Connect your wallet to explore Ethereum Follow Protocol data</p>
+        </header>
+
+        <div class="wallet-section">
+            <button id="connectWalletBtn" class="btn primary">Connect Wallet</button>
+            <button id="siweBtn" class="btn secondary hidden">Sign in with Ethereum</button>
+        </div>
+
+        <div id="userInfo" class="user-info hidden">
+            <div class="user-header">
+                <div id="userAvatar" class="avatar-container"></div>
+                <div class="user-details">
+                    <h2 id="userName">Loading...</h2>
+                    <p id="userAddress" class="address"></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="efpProfile" class="efp-section hidden">
+            <h3>EFP Social Graph</h3>
+            <div id="efpLoader" class="loader">Loading EFP data...</div>
+            <div id="efpContainer" class="hidden">
+                <div id="efpStats" class="stats-container"></div>
+                <div id="efpConnections" class="connections-section"></div>
+            </div>
+        </div>
+
+        <div id="noEFPProfile" class="no-profile hidden">
+            <h3>No EFP Profile Found</h3>
+            <p>This address doesn't have any EFP social graph data yet.</p>
+            <a href="https://efp.app" target="_blank" class="btn secondary">Create EFP Profile</a>
+        </div>
+
+        <div id="errorMessage" class="error hidden"></div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
