@@ -1,128 +1,70 @@
-# EFP Data - React Components
+# EFP Data React Components with ethereum-identity-kit
 
-A React implementation for integrating Ethereum Follow Protocol (EFP) data into your SIWE application using modern React patterns and the Ethereum Identity Kit.
+This directory contains a React application that uses the ethereum-identity-kit library to display Ethereum profiles and social data.
 
 ## Features
 
-- React hooks for EFP data fetching
-- Reusable components for ENS and EFP profiles
-- Modern React patterns with functional components
-- Responsive design with CSS Grid and Flexbox
-- Error handling and loading states
-- Integration with Ethereum Identity Kit (optional)
+- Connect wallet functionality using Wagmi
+- Display comprehensive Ethereum profiles using ProfileCard component
+- Individual components: Avatar, ProfileStats, ProfileSocials
+- Follow/unfollow functionality with FollowButton
+- Transaction handling with TransactionProvider and TransactionModal
+- Search for any ENS name or Ethereum address
 
-## Components
+## Installation
 
-### Core Components
-- `App.js` - Main application component with SIWE authentication
-- `AuthButtons.js` - Authentication button group
-- `ENSProfile.js` - ENS profile display component
-- `EFPProfile.js` - EFP social graph component
+```bash
+npm install
+```
 
-### Styling
-- `styles.css` - Complete CSS styling for all components
-- Responsive design with mobile-first approach
-- Modern glassmorphism effects and animations
+## Configuration
 
-## Setup
+1. Update the WalletConnect project ID in `src/App.js`:
+```javascript
+walletConnect({ projectId: 'YOUR_WALLETCONNECT_PROJECT_ID' })
+```
 
-1. Install dependencies:
-   ```bash
-   yarn install
-   ```
+## Running the Application
 
-2. Start the development server:
-   ```bash
-   yarn start
-   ```
+```bash
+npm start
+```
 
-3. Ensure your SIWE backend is running on localhost:3000
+The app will run on http://localhost:3000
 
-4. Open http://localhost:8081 in your browser
+## Components Used from ethereum-identity-kit
+
+- **ProfileCard**: Main component displaying comprehensive profile information
+- **FollowButton**: Manages follow/unfollow interactions
+- **Avatar**: Displays user avatar
+- **ProfileStats**: Shows follower/following statistics
+- **ProfileSocials**: Displays social links
+- **TransactionProvider**: Handles transaction state management
+- **TransactionModal**: Shows transaction status and confirmations
+
+## Project Structure
+
+```
+src/
+├── App.js              # Main app with providers setup
+├── App.css             # Application styles
+├── index.js            # React entry point
+├── index.css           # Global styles
+└── components/
+    ├── ProfileViewer.js # Main profile viewing component
+    ├── ENSProfile.js   # Legacy ENS profile component (kept for reference)
+    └── EFPProfile.js   # Legacy EFP profile component (kept for reference)
+```
 
 ## Usage
 
-### Basic Integration
+The application is ready to use out of the box. Simply:
 
-```jsx
-import EFPProfile from './components/EFPProfile';
-
-function MyApp() {
-  const [userAddress, setUserAddress] = useState(null);
-  
-  return (
-    <div>
-      {userAddress && <EFPProfile address={userAddress} />}
-    </div>
-  );
-}
-```
-
-### With Ethereum Identity Kit
-
-```jsx
-import { useEFPProfile } from '@ethereum-identity-kit/core';
-
-function EFPComponent({ address }) {
-  const { data: efpData, loading, error } = useEFPProfile(address);
-  
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
-  
-  return (
-    <div>
-      <div>Followers: {efpData.followers}</div>
-      <div>Following: {efpData.following}</div>
-    </div>
-  );
-}
-```
-
-## API Integration
-
-The components use the following EFP API endpoints:
-
-- `GET /api/v1/users/{address}/stats` - Get follower/following counts
-- `GET /api/v1/users/{address}/following` - Get following list
-- `GET /api/v1/users/{address}/followers` - Get followers list
+1. Connect your wallet using MetaMask or WalletConnect
+2. View your own profile or search for others using ENS names or addresses
+3. Follow/unfollow users directly from their profiles
+4. All transactions are handled seamlessly with the TransactionModal
 
 ## Customization
 
-### Styling
-Modify `styles.css` to customize the appearance:
-- Color schemes in CSS variables
-- Component-specific styling
-- Responsive breakpoints
-
-### Components
-Extend components with additional features:
-- Add more EFP endpoints
-- Implement search and filtering
-- Add user interaction features
-
-### Configuration
-Update the following constants in `App.js`:
-- `BACKEND_ADDR` - Your SIWE backend URL
-- API limits and pagination
-- Error handling strategies
-
-## Dependencies
-
-- React 18.2+
-- ethers.js 6.3+
-- siwe 3.0+
-- @ethereum-identity-kit/core (optional)
-
-## Browser Support
-
-- Chrome 88+
-- Firefox 78+
-- Safari 14+
-- Edge 88+
-
-## Performance
-
-- Components use React.memo for optimal re-rendering
-- API calls are debounced and cached
-- Images are lazy-loaded
-- CSS animations use GPU acceleration
+The ethereum-identity-kit library provides extensive customization options through CSS variables and component props. Refer to the [official documentation](https://ethidentitykit.com) for detailed customization guides.

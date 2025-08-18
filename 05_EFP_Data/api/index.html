@@ -3,25 +3,33 @@
 
 <head>
   <meta charset="utf-8" />
-  <title>SIWE Quickstart - EFP Data</title>
+  <title>EFP Data Viewer</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
   <div class="container">
-    <h1>SIWE + EFP Social Graph</h1>
+    <h1>EFP Social Graph Viewer</h1>
     
-    <div class="auth-section">
-      <button id="connectWalletBtn" class="btn btn-primary">Connect Wallet</button>
-      <button id="siweBtn" class="btn btn-primary">Sign-in with Ethereum</button>
-      <button id="infoBtn" class="btn btn-secondary">Get Session Information</button>
+    <div class="search-section">
+      <h3>Enter ENS name or Ethereum address</h3>
+      <div class="input-group">
+        <input type="text" id="addressInput" placeholder="Enter ENS name (vitalik.eth) or address (0x123...)" class="address-input">
+        <button id="searchBtn" class="btn btn-primary">Search Profile</button>
+      </div>
+      <div class="examples">
+        <p>Try these examples:</p>
+        <button class="example-btn" data-address="vitalik.eth">vitalik.eth</button>
+        <button class="example-btn" data-address="hayden.eth">hayden.eth</button>
+        <button class="example-btn" data-address="sassal.eth">sassal.eth</button>
+      </div>
     </div>
 
     <div class="hidden" id="welcome" class="welcome-section">
     </div>
 
     <div class="hidden" id="profile" class="profile-section">
-      <h3>ENS Metadata:</h3>
+      <h3>Account Information:</h3>
       <div id="ensLoader" class="loader">Loading...</div>
       <div id="ensContainer" class="hidden">
         <table id="ensTable" class="data-table">

@@ -15,9 +15,14 @@ const ensContainerElm = document.getElementById('ensContainer');
 const ensTableElm = document.getElementById('ensTable');
 
 const assetsElm = document.getElementById('onchainAssets');
-const assetsLoaderElm = document.getElementById('assetsLoader');
-const assetsContainerElm = document.getElementById('assetsContainer');
-const assetsTableElm = document.getElementById('assetsTable');
+
+const tokensLoaderElm = document.getElementById('tokensLoader');
+const tokensContainerElm = document.getElementById('tokensContainer');
+const tokensTableElm = document.getElementById('tokensTable');
+
+const nftsLoaderElm = document.getElementById('nftsLoader');
+const nftsContainerElm = document.getElementById('nftsContainer');
+const nftsTableElm = document.getElementById('nftsTable');
 
 let address;
 let chain;
@@ -76,9 +81,28 @@ async function displayENSProfile() {
     welcomeElm.classList = '';
 }
 
-async function getOnchainAssets() {
+async function getTokenBalances() {
     try {
-        let res = await fetch(`https://testnets-api.opensea.io/api/v2/chain/${chain}/account/${address}/nfts`);
+        let res = await fetch(`${BACKEND_ADDR}/tokens/${address}`, {
+            credentials: 'include',
+        });
+        if (!res.ok) {
+            throw new Error(res.statusText)
+        }
+
+        let body = await res.json();
+        return body.tokens || [];
+    } catch (err) {
+        console.error(`Failed to resolve token balances: ${err.message}`);
+        return [];
+    }
+}
+
+async function getNFTs() {
+    try {
+        let res = await fetch(`${BACKEND_ADDR}/nfts/${address}?chain=${chain}`, {
+            credentials: 'include',
+        });
         if (!res.ok) {
             throw new Error(res.statusText)
         }
@@ -95,29 +119,47 @@ async function getOnchainAssets() {
             return {name, address, collection};
         });
     } catch (err) {
-        console.error(`Failed to resolve onchain assets: ${err.message}`);
+        console.error(`Failed to resolve NFTs: ${err.message}`);
         return [];
     }
 }
 
 async function displayOnchainAssets() {
-    assetsLoaderElm.innerHTML = 'Loading Onchain Assets...';
     assetsElm.classList = '';
 
-    let assets = await getOnchainAssets();
-    if (assets.length === 0) {
-        assetsLoaderElm.innerHTML = 'No onchain assets found';
-        return;
+    // Display Tokens
+    tokensLoaderElm.innerHTML = 'Loading token balances...';
+    let tokens = await getTokenBalances();
+    
+    if (tokens.length === 0) {
+        tokensLoaderElm.innerHTML = 'No tokens found';
+    } else {
+        let tokenTableHtml = "<tr><th>Token</th><th>Symbol</th><th>Balance</th><th>Contract</th></tr>";
+        tokens.forEach((token) => {
+            tokenTableHtml += `<tr><td>${token.name}</td><td>${token.symbol}</td><td>${token.balance}</td><td>${token.contractAddress}</td></tr>`
+        });
+        
+        tokensTableElm.innerHTML = tokenTableHtml;
+        tokensContainerElm.classList = '';
+        tokensLoaderElm.innerHTML = '';
     }
 
-    let tableHtml = "<tr><th>Name</th><th>Contract Address</th><th>Collection</th></tr>";
-    assets.forEach((asset) => {
-        tableHtml += `<tr><td>${asset.name}</td><td>${asset.address}</td><td>${asset.collection}</td></tr>`
-    });
-
-    assetsTableElm.innerHTML = tableHtml;
-    assetsContainerElm.classList = '';
-    assetsLoaderElm.innerHTML = '';
+    // Display NFTs
+    nftsLoaderElm.innerHTML = 'Loading NFT holdings...';
+    let nfts = await getNFTs();
+    
+    if (nfts.length === 0) {
+        nftsLoaderElm.innerHTML = 'No NFTs found';
+    } else {
+        let nftTableHtml = "<tr><th>Name</th><th>Contract Address</th><th>Collection</th></tr>";
+        nfts.forEach((nft) => {
+            nftTableHtml += `<tr><td>${nft.name}</td><td>${nft.address}</td><td>${nft.collection}</td></tr>`
+        });
+        
+        nftsTableElm.innerHTML = nftTableHtml;
+        nftsContainerElm.classList = '';
+        nftsLoaderElm.innerHTML = '';
+    }
 }
 
 async function signInWithEthereum() {
