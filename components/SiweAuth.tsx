@@ -23,7 +23,7 @@ export function SiweAuth({
 
   if (user) {
     return (
-      <div>
+      <div className="card">
         {ensAvatar && (
           <Image
             src={ensAvatar}
@@ -34,14 +34,15 @@ export function SiweAuth({
             style={{ borderRadius: '50%' }}
           />
         )}
-        <p>Signed in as {ensName ?? truncateAddress(user)}</p>
+        <p>Signed in as <strong>{ensName ?? truncateAddress(user)}</strong></p>
+        <p className="address">{user}</p>
         <button onClick={signOut}>Sign out</button>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="card">
       <button
         onClick={signIn}
         disabled={isLoading}

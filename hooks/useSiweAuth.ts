@@ -28,6 +28,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
         if (data) {
           setUser(data.address)
           onUserChangeRef.current?.(data.address)
+          window.dispatchEvent(new Event('siwe-auth-change'))
         }
       })
       .catch(() => {})
@@ -69,6 +70,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
         const data = await res.json()
         setUser(data.address)
         onUserChangeRef.current?.(data.address)
+        window.dispatchEvent(new Event('siwe-auth-change'))
       }
     } catch (err) {
       const e = err as { name?: string; code?: number; message?: string }
@@ -109,6 +111,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
     await fetch('/api/logout', { method: 'POST' })
     setUser(null)
     onUserChangeRef.current?.(null)
+    window.dispatchEvent(new Event('siwe-auth-change'))
     disconnect()
   }, [disconnect])
 

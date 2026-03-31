@@ -15,9 +15,9 @@ function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
 
   if (!mounted) return null
 
-  if (isConnected) {
+  if (isConnected && !hideDisconnect) {
     return (
-      <div>
+      <div className="card">
         <p>{address && truncateAddress(address)}</p>
         {!hideDisconnect && (
           <button onClick={() => disconnect()}>Disconnect</button>
@@ -26,19 +26,24 @@ function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
     )
   }
 
+  if (isConnected) return null
+
   return (
-    <div>
-      {connectors.map((connector) => (
-        <button
-          key={connector.uid}
-          onClick={() => connect({ connector })}
-          disabled={isPending}
-        >
-          {isPending && variables?.connector === connector
-            ? 'Connecting…'
-            : connector.name}
-        </button>
-      ))}
+    <div className="card">
+      <p className="card-label">Connect a wallet</p>
+      <div className="connectors">
+        {connectors.map((connector) => (
+          <button
+            key={connector.uid}
+            onClick={() => connect({ connector })}
+            disabled={isPending}
+          >
+            {isPending && variables?.connector === connector
+              ? 'Connecting…'
+              : connector.name}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
