@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { SiweMessage } from '@signinwithethereum/siwe'
 import { useConnection, useDisconnect, useSignMessage } from 'wagmi'
 
+let signInLock = false
+let autoSignInAttempted: string | null = null
+
 interface UseSiweAuthOptions {
   onUserChange?: (user: string | null) => void
 }
@@ -17,27 +20,29 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasCheckedSession, setHasCheckedSession] = useState(false)
-  const autoSignInAttempted = useRef<string | null>(null)
   const signInRef = useRef<() => void>(() => {})
+
+  const updateUser = useCallback((address: string | null) => {
+    setUser(address)
+    onUserChangeRef.current?.(address)
+    window.dispatchEvent(new Event('siwe-auth-change'))
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/me', { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) {
-          setUser(data.address)
-          onUserChangeRef.current?.(data.address)
-          window.dispatchEvent(new Event('siwe-auth-change'))
-        }
+        if (data) updateUser(data.address)
+        setHasCheckedSession(true)
       })
       .catch(() => {})
-      .finally(() => setHasCheckedSession(true))
     return () => controller.abort()
-  }, [])
+  }, [updateUser])
 
   const signIn = useCallback(async () => {
-    if (!address || !chainId) return
+    if (!address || !chainId || signInLock) return
+    signInLock = true
     setIsLoading(true)
 
     try {
@@ -68,9 +73,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
 
       if (res.ok) {
         const data = await res.json()
-        setUser(data.address)
-        onUserChangeRef.current?.(data.address)
-        window.dispatchEvent(new Event('siwe-auth-change'))
+        updateUser(data.address)
       }
     } catch (err) {
       const e = err as { name?: string; code?: number; message?: string }
@@ -86,11 +89,17 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
         setError('Sign-in failed')
       }
     } finally {
+      signInLock = false
       setIsLoading(false)
     }
   }, [address, chainId, signMessageAsync])
 
   signInRef.current = signIn
+
+  // Reset auto sign-in guard when wallet fully disconnects
+  useEffect(() => {
+    if (!address) autoSignInAttempted = null
+  }, [address])
 
   // Auto sign-in when wallet connects and no existing session
   useEffect(() => {
@@ -100,20 +109,19 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
       chainId &&
       !user &&
       !isLoading &&
-      autoSignInAttempted.current !== address
+      autoSignInAttempted !== address
     ) {
-      autoSignInAttempted.current = address
+      autoSignInAttempted = address
       signInRef.current()
     }
   }, [hasCheckedSession, address, chainId, user, isLoading])
 
   const signOut = useCallback(async () => {
+    autoSignInAttempted = address ?? null
     await fetch('/api/logout', { method: 'POST' })
-    setUser(null)
-    onUserChangeRef.current?.(null)
-    window.dispatchEvent(new Event('siwe-auth-change'))
+    updateUser(null)
     disconnect()
-  }, [disconnect])
+  }, [address, updateUser, disconnect])
 
   return { user, isLoading, error, signIn, signOut }
 }

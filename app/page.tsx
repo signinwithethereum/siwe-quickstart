@@ -2,32 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useConnection, useConnect, useConnectors, useDisconnect } from 'wagmi'
+import { useConnection, useConnect, useConnectors } from 'wagmi'
 import { SiweAuth } from '@/components/SiweAuth'
 import { useMounted } from '@/hooks/useMounted'
-import { truncateAddress } from '@/lib/format'
 
-function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
-  const { isConnected, address } = useConnection()
+function ConnectWallet() {
+  const { isConnected } = useConnection()
   const connectors = useConnectors()
   const { mutate: connect, isPending, variables } = useConnect()
-  const { mutate: disconnect } = useDisconnect()
   const mounted = useMounted()
 
-  if (!mounted) return null
-
-  if (isConnected && !hideDisconnect) {
-    return (
-      <div className="card">
-        <p>{address && truncateAddress(address)}</p>
-        {!hideDisconnect && (
-          <button onClick={() => disconnect()}>Disconnect</button>
-        )}
-      </div>
-    )
-  }
-
-  if (isConnected) return null
+  if (!mounted || isConnected) return null
 
   return (
     <div className="card">
@@ -59,7 +44,7 @@ export default function Home() {
         <p>Welcome back &rarr; <Link href="/dashboard">Dashboard</Link></p>
       ) : (
         <>
-          <ConnectWallet hideDisconnect={!!siweUser} />
+          <ConnectWallet />
           <SiweAuth onUserChange={setSiweUser} />
         </>
       )}
