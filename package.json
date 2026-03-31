@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.2.10",
     "@signinwithethereum/siwe": "^4.1.0",
     "@tanstack/react-query": "^5.95.2",
     "iron-session": "^8.0.4",
