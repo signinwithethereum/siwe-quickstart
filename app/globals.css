@@ -37,3 +37,8 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.error {
+  color: #d33;
+  font-size: 0.875rem;
+}
