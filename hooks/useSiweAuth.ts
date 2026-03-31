@@ -1,8 +1,6 @@
-'use client'
-
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SiweMessage } from '@signinwithethereum/siwe'
-import { useAccount, useDisconnect, useSignMessage } from 'wagmi'
+import { useConnection, useDisconnect, useSignMessage } from 'wagmi'
 
 interface UseSiweAuthOptions {
   onUserChange?: (user: string | null) => void
@@ -10,24 +8,28 @@ interface UseSiweAuthOptions {
 
 export function useSiweAuth(options?: UseSiweAuthOptions) {
   const { onUserChange } = options ?? {}
-  const { address, chainId, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
-  const { signMessageAsync } = useSignMessage()
+  const onUserChangeRef = useRef(onUserChange)
+  onUserChangeRef.current = onUserChange
+  const { address, chainId } = useConnection()
+  const { mutate: disconnect } = useDisconnect()
+  const { mutateAsync: signMessageAsync } = useSignMessage()
   const [user, setUser] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Restore session on mount
   useEffect(() => {
-    fetch('/api/me')
+    const controller = new AbortController()
+    fetch('/api/me', { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
           setUser(data.address)
-          onUserChange?.(data.address)
+          onUserChangeRef.current?.(data.address)
         }
       })
-  }, [onUserChange])
+      .catch(() => {})
+    return () => controller.abort()
+  }, [])
 
   const signIn = useCallback(async () => {
     if (!address || !chainId) return
@@ -62,7 +64,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
       if (res.ok) {
         const data = await res.json()
         setUser(data.address)
-        onUserChange?.(data.address)
+        onUserChangeRef.current?.(data.address)
       }
     } catch (err) {
       const e = err as { name?: string; code?: number; message?: string }
@@ -80,14 +82,14 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
     } finally {
       setIsLoading(false)
     }
-  }, [address, chainId, signMessageAsync, onUserChange])
+  }, [address, chainId, signMessageAsync])
 
   const signOut = useCallback(async () => {
     await fetch('/api/logout', { method: 'POST' })
     setUser(null)
-    onUserChange?.(null)
+    onUserChangeRef.current?.(null)
     disconnect()
-  }, [disconnect, onUserChange])
+  }, [disconnect])
 
-  return { user, isLoading, error, signIn, signOut, isConnected }
+  return { user, isLoading, error, signIn, signOut }
 }

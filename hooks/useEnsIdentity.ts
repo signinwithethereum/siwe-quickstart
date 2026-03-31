@@ -1,5 +1,3 @@
-'use client'
-
 import { useEnsAvatar, useEnsName } from 'wagmi'
 import { mainnet } from 'wagmi/chains'
 

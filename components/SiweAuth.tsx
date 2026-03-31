@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useConnection } from 'wagmi'
 import { useMounted } from '@/hooks/useMounted'
 import { useSiweAuth } from '@/hooks/useSiweAuth'
 import { useEnsIdentity } from '@/hooks/useEnsIdentity'
@@ -12,7 +13,8 @@ export function SiweAuth({
   onUserChange?: (user: string | null) => void
 }) {
   const mounted = useMounted()
-  const { user, isLoading, error, signIn, signOut, isConnected } = useSiweAuth({
+  const { isConnected } = useConnection()
+  const { user, isLoading, error, signIn, signOut } = useSiweAuth({
     onUserChange,
   })
   const { ensName, ensAvatar } = useEnsIdentity(user)
