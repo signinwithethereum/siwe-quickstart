@@ -9,7 +9,7 @@ import { truncateAddress } from '@/lib/format'
 function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
   const { isConnected, address } = useConnection()
   const connectors = useConnectors()
-  const { mutate: connect } = useConnect()
+  const { mutate: connect, isPending, variables } = useConnect()
   const { mutate: disconnect } = useDisconnect()
   const mounted = useMounted()
 
@@ -32,8 +32,11 @@ function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
         <button
           key={connector.uid}
           onClick={() => connect({ connector })}
+          disabled={isPending}
         >
-          {connector.name}
+          {isPending && variables?.connector === connector
+            ? 'Connecting…'
+            : connector.name}
         </button>
       ))}
     </div>
