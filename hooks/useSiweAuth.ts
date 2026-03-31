@@ -16,6 +16,9 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
   const [user, setUser] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hasCheckedSession, setHasCheckedSession] = useState(false)
+  const autoSignInAttempted = useRef<string | null>(null)
+  const signInRef = useRef<() => void>(() => {})
 
   useEffect(() => {
     const controller = new AbortController()
@@ -28,6 +31,7 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
         }
       })
       .catch(() => {})
+      .finally(() => setHasCheckedSession(true))
     return () => controller.abort()
   }, [])
 
@@ -83,6 +87,23 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
       setIsLoading(false)
     }
   }, [address, chainId, signMessageAsync])
+
+  signInRef.current = signIn
+
+  // Auto sign-in when wallet connects and no existing session
+  useEffect(() => {
+    if (
+      hasCheckedSession &&
+      address &&
+      chainId &&
+      !user &&
+      !isLoading &&
+      autoSignInAttempted.current !== address
+    ) {
+      autoSignInAttempted.current = address
+      signInRef.current()
+    }
+  }, [hasCheckedSession, address, chainId, user, isLoading])
 
   const signOut = useCallback(async () => {
     await fetch('/api/logout', { method: 'POST' })
