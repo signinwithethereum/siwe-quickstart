@@ -6,7 +6,10 @@ export async function POST(request: Request) {
   const session = await getSession()
   const body = await request.json().catch(() => null)
   if (!body?.message || !body?.signature) {
-    return Response.json({ error: 'Missing message or signature' }, { status: 400 })
+    return Response.json(
+      { error: 'Missing message or signature' },
+      { status: 400 },
+    )
   }
   const { message, signature } = body
 
