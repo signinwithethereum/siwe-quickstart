@@ -144,7 +144,7 @@ export function SiweAuth({
       >
         {isLoading ? 'Signing in…' : 'Sign in with Ethereum'}
       </button>
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
     </div>
   )
 }
