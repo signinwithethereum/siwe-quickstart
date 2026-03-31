@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
     const { data } = await siweMessage.verify({
       signature,
-      domain: new URL(request.url).host,
+      domain: process.env.NEXT_PUBLIC_DOMAIN ?? new URL(request.url).host,
       nonce: session.nonce,
     })
 
