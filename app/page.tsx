@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { SiweAuth } from '@/components/SiweAuth'
 
@@ -8,9 +8,11 @@ function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
   const { isConnected, address } = useAccount()
   const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   if (!mounted) return null
 

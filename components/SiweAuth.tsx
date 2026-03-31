@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { SiweMessage } from '@signinwithethereum/siwe'
 import {
   useAccount,
@@ -9,6 +9,7 @@ import {
   useEnsName,
   useSignMessage,
 } from 'wagmi'
+import Image from 'next/image'
 import { mainnet } from 'wagmi/chains'
 
 export function SiweAuth({
@@ -22,7 +23,11 @@ export function SiweAuth({
   const [user, setUser] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
 
   const { data: ensName } = useEnsName({
     address: user as `0x${string}` | undefined,
@@ -32,8 +37,6 @@ export function SiweAuth({
     name: ensName ?? undefined,
     chainId: mainnet.id,
   })
-
-  useEffect(() => setMounted(true), [])
 
   // Check if already authenticated
   useEffect(() => {
@@ -45,7 +48,7 @@ export function SiweAuth({
           onUserChange?.(data.address)
         }
       })
-  }, [])
+  }, [onUserChange])
 
   const signIn = useCallback(async () => {
     if (!address || !chainId) return
@@ -118,11 +121,12 @@ export function SiweAuth({
     return (
       <div>
         {ensAvatar && (
-          <img
+          <Image
             src={ensAvatar}
             alt={ensName ?? user}
             width={48}
             height={48}
+            unoptimized
             style={{ borderRadius: '50%' }}
           />
         )}
