@@ -16,6 +16,8 @@ cp .env.local.example .env.local
 
 You'll need a [WalletConnect project ID](https://cloud.walletconnect.com) (free).
 
+For production, set `NEXT_PUBLIC_DOMAIN` to your app's public hostname (e.g. `example.com`). This ensures SIWE domain verification matches the domain users see. Not needed for local development.
+
 ## Run
 
 ```bash
