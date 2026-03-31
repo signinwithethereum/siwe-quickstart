@@ -1,27 +1,23 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useState } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { SiweAuth } from '@/components/SiweAuth'
+import { useMounted } from '@/hooks/useMounted'
+import { truncateAddress } from '@/lib/format'
 
 function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
   const { isConnected, address } = useAccount()
   const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  )
+  const mounted = useMounted()
 
   if (!mounted) return null
 
   if (isConnected) {
     return (
       <div>
-        <p>
-          {address?.slice(0, 6)}…{address?.slice(-4)}
-        </p>
+        <p>{address && truncateAddress(address)}</p>
         {!hideDisconnect && (
           <button onClick={() => disconnect()}>Disconnect</button>
         )}
