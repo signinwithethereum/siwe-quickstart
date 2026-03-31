@@ -29,8 +29,9 @@ export function SiweAuth({
     () => false,
   )
 
+  const ensAddress = user ? (user as `0x${string}`) : undefined
   const { data: ensName } = useEnsName({
-    address: user as `0x${string}` | undefined,
+    address: ensAddress,
     chainId: mainnet.id,
   })
   const { data: ensAvatar } = useEnsAvatar({
