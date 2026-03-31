@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "npx prettier --write ."
   },
   "dependencies": {
     "@signinwithethereum/siwe": "^4.1.0",
