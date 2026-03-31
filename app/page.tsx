@@ -44,7 +44,11 @@ export default function Home() {
       <h1>SIWE Demo</h1>
       <p className="subtitle">
         A minimal{' '}
-        <a href="https://siwe.xyz" target="_blank" rel="noopener noreferrer">
+        <a
+          href="https://siwe.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Sign in with Ethereum
         </a>{' '}
         quickstart built with Next.js, Wagmi, and the{' '}
@@ -59,9 +63,12 @@ export default function Home() {
       </p>
 
       {user ? (
-        <p>
-          Welcome back &rarr; <Link href="/dashboard">Dashboard</Link>
-        </p>
+        <div className="card">
+          <p>Welcome back!</p>
+          <Link href="/dashboard">
+            <button>Go to Dashboard</button>
+          </Link>
+        </div>
       ) : (
         <>
           <ConnectWallet />
