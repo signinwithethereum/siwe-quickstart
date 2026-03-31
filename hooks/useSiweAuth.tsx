@@ -1,18 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+'use client'
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { SiweMessage } from '@signinwithethereum/siwe'
 import { useConnection, useDisconnect, useSignMessage } from 'wagmi'
 
-let signInLock = false
-let autoSignInAttempted: string | null = null
-
-interface UseSiweAuthOptions {
-  onUserChange?: (user: string | null) => void
+interface SiweAuthState {
+  user: string | null
+  isLoading: boolean
+  error: string | null
+  signIn: () => Promise<void>
+  signOut: () => Promise<void>
 }
 
-export function useSiweAuth(options?: UseSiweAuthOptions) {
-  const { onUserChange } = options ?? {}
-  const onUserChangeRef = useRef(onUserChange)
-  onUserChangeRef.current = onUserChange
+const SiweAuthContext = createContext<SiweAuthState | null>(null)
+
+export function SiweAuthProvider({ children }: { children: ReactNode }) {
   const { address, chainId } = useConnection()
   const { mutate: disconnect } = useDisconnect()
   const { mutateAsync: signMessageAsync } = useSignMessage()
@@ -20,29 +30,24 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasCheckedSession, setHasCheckedSession] = useState(false)
+  const autoSignInAttempted = useRef<string | null>(null)
+  const signedOut = useRef(false)
   const signInRef = useRef<() => void>(() => {})
-
-  const updateUser = useCallback((address: string | null) => {
-    setUser(address)
-    onUserChangeRef.current?.(address)
-    window.dispatchEvent(new Event('siwe-auth-change'))
-  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
     fetch('/api/me', { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) updateUser(data.address)
-        setHasCheckedSession(true)
+        if (data) setUser(data.address)
       })
       .catch(() => {})
+      .finally(() => setHasCheckedSession(true))
     return () => controller.abort()
-  }, [updateUser])
+  }, [])
 
   const signIn = useCallback(async () => {
-    if (!address || !chainId || signInLock) return
-    signInLock = true
+    if (!address || !chainId) return
     setIsLoading(true)
 
     try {
@@ -73,7 +78,8 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
 
       if (res.ok) {
         const data = await res.json()
-        updateUser(data.address)
+        setUser(data.address)
+        signedOut.current = false
       }
     } catch (err) {
       const e = err as { name?: string; code?: number; message?: string }
@@ -89,7 +95,6 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
         setError('Sign-in failed')
       }
     } finally {
-      signInLock = false
       setIsLoading(false)
     }
   }, [address, chainId, signMessageAsync])
@@ -98,7 +103,10 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
 
   // Reset auto sign-in guard when wallet fully disconnects
   useEffect(() => {
-    if (!address) autoSignInAttempted = null
+    if (!address) {
+      autoSignInAttempted.current = null
+      signedOut.current = false
+    }
   }, [address])
 
   // Auto sign-in when wallet connects and no existing session
@@ -109,19 +117,32 @@ export function useSiweAuth(options?: UseSiweAuthOptions) {
       chainId &&
       !user &&
       !isLoading &&
-      autoSignInAttempted !== address
+      !signedOut.current &&
+      autoSignInAttempted.current !== address
     ) {
-      autoSignInAttempted = address
+      autoSignInAttempted.current = address
       signInRef.current()
     }
   }, [hasCheckedSession, address, chainId, user, isLoading])
 
   const signOut = useCallback(async () => {
-    autoSignInAttempted = address ?? null
+    signedOut.current = true
     await fetch('/api/logout', { method: 'POST' })
-    updateUser(null)
+    setUser(null)
     disconnect()
-  }, [address, updateUser, disconnect])
+  }, [disconnect])
 
-  return { user, isLoading, error, signIn, signOut }
+  const value: SiweAuthState = { user, isLoading, error, signIn, signOut }
+
+  return (
+    <SiweAuthContext.Provider value={value}>
+      {children}
+    </SiweAuthContext.Provider>
+  )
+}
+
+export function useSiweAuth(): SiweAuthState {
+  const ctx = useContext(SiweAuthContext)
+  if (!ctx) throw new Error('useSiweAuth must be used within SiweAuthProvider')
+  return ctx
 }

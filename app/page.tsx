@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useConnection, useConnect, useConnectors } from 'wagmi'
 import { SiweAuth } from '@/components/SiweAuth'
 import { useMounted } from '@/hooks/useMounted'
+import { useSiweAuth } from '@/hooks/useSiweAuth'
 
 function ConnectWallet() {
   const { isConnected } = useConnection()
@@ -35,17 +35,19 @@ function ConnectWallet() {
 }
 
 export default function Home() {
-  const [siweUser, setSiweUser] = useState<string | null>(null)
+  const { user } = useSiweAuth()
 
   return (
     <main>
       <h1>SIWE Demo</h1>
-      {siweUser ? (
-        <p>Welcome back &rarr; <Link href="/dashboard">Dashboard</Link></p>
+      {user ? (
+        <p>
+          Welcome back &rarr; <Link href="/dashboard">Dashboard</Link>
+        </p>
       ) : (
         <>
           <ConnectWallet />
-          <SiweAuth onUserChange={setSiweUser} />
+          <SiweAuth />
         </>
       )}
     </main>
