@@ -6,7 +6,7 @@ import { SiweAuth } from '@/components/SiweAuth'
 
 function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
   const { isConnected, address } = useAccount()
-  const { connectors, connectAsync } = useConnect()
+  const { connectors, connect } = useConnect()
   const { disconnect } = useDisconnect()
   const [mounted, setMounted] = useState(false)
 
@@ -32,7 +32,7 @@ function ConnectWallet({ hideDisconnect }: { hideDisconnect: boolean }) {
       {connectors.map((connector) => (
         <button
           key={connector.uid}
-          onClick={() => connectAsync({ connector }).catch(() => {})}
+          onClick={() => connect({ connector })}
         >
           {connector.name}
         </button>
