@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useConnection, useConnect, useConnectors, useDisconnect } from 'wagmi'
 import { SiweAuth } from '@/components/SiweAuth'
 import { useMounted } from '@/hooks/useMounted'
@@ -54,8 +55,14 @@ export default function Home() {
   return (
     <main>
       <h1>SIWE Demo</h1>
-      <ConnectWallet hideDisconnect={!!siweUser} />
-      <SiweAuth onUserChange={setSiweUser} />
+      {siweUser ? (
+        <p>Welcome back &rarr; <Link href="/dashboard">Dashboard</Link></p>
+      ) : (
+        <>
+          <ConnectWallet hideDisconnect={!!siweUser} />
+          <SiweAuth onUserChange={setSiweUser} />
+        </>
+      )}
     </main>
   )
 }
