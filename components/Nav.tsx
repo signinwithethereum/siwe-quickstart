@@ -24,11 +24,17 @@ export function Nav() {
 
   return (
     <nav>
-      <Link href="/" className={pathname === '/' ? 'active' : ''}>
+      <Link
+        href="/"
+        className={pathname === '/' ? 'active' : ''}
+      >
         Home
       </Link>
       {user && (
-        <Link href="/dashboard" className={pathname === '/dashboard' ? 'active' : ''}>
+        <Link
+          href="/dashboard"
+          className={pathname === '/dashboard' ? 'active' : ''}
+        >
           Dashboard
         </Link>
       )}

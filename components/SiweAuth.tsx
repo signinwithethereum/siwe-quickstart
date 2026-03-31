@@ -34,7 +34,9 @@ export function SiweAuth({
             style={{ borderRadius: '50%' }}
           />
         )}
-        <p>Signed in as <strong>{ensName ?? truncateAddress(user)}</strong></p>
+        <p>
+          Signed in as <strong>{ensName ?? truncateAddress(user)}</strong>
+        </p>
         <p className="address">{user}</p>
         <button onClick={signOut}>Sign out</button>
       </div>
