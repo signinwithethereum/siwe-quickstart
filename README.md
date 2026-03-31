@@ -1,14 +1,10 @@
 # SIWE Quickstart
 
-A minimal [Sign in with Ethereum](https://login.xyz) app built with Next.js, wagmi, viem, and RainbowKit.
-
-Full tutorial: [docs.login.xyz/quickstart](https://docs.login.xyz/quickstart)
+A minimal [Sign in with Ethereum](https://siwe.xyz) app built with Next.js, wagmi, and viem.
 
 ## Setup
 
 ```bash
-git clone https://github.com/signinwithethereum/siwe-quickstart
-cd siwe-quickstart
 npm install
 ```
 
